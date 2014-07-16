@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Upload</title>
+    <link rel="stylesheet" href="base.css"/>
+    <script src="sha1.js"></script>
+    <style>
+        span.filename {
+            padding: 0.5em 0.5em;
+            margin: 0.15em;
+        }
+
+        span.cross {
+            color: #810d00;
+            float: right;
+            cursor: pointer;
+        }
+        span.cross:hover {
+            color: red;
+        }
+        div.file {
+            padding: 0.15em;
+            border: 1px solid gray;
+            width: 60%;
+            margin: 0.15em auto;
+
+        }
+    </style>
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var inp = document.getElementById('inp1');
+            var div = document.getElementsByClassName('input')[0];
+            var displayImages = document.getElementById('selected_images');
+
+            div.files = [];
+            div.fileIndices = [];
+            inp.addEventListener('change', function(event){
+                console.log(event.target.files);
+                div.files = Array.prototype.slice.call(this.files);
+                div.files.forEach(function (file, index) {
+                    var file_div = document.createElement('div');
+                    file_div.className = 'file';
+
+                    // span - filename
+                    var filename_span = document.createElement('span');
+                    filename_span.innerHTML = file.name;
+                    filename_span.className = 'filename';
+                    file_div.appendChild(filename_span);
+
+                    // span - remove file
+                    var cross_span = document.createElement('span');
+                    cross_span.innerHTML = '&#10006;';
+                    cross_span.className = 'cross';
+                    file_div.appendChild(cross_span);
+                    cross_span.addEventListener('click', function (event) {
+                        var parentdiv = event.target.parentNode;
+                        var dataid = parentdiv.getAttribute('data-id');
+                        var index = div.fileIndices.indexOf(dataid);
+                        div.fileIndices.splice(index, 1);
+                        div.files.splice(index, 1);
+                        parentdiv.parentNode.removeChild(parentdiv);
+
+                        var images = displayImages.children;
+                        for (var i = 0, len = images.length; i < len; i++) {
+
+                            if (images[i].dataset.id === dataid) {
+                                displayImages.removeChild(images[i]);
+                                break;
+                            }
+                        }
+
+                        console.log(index);
+                    });
+
+                    // create a hash for each file
+                    // put the hash inside fileIndices
+                    // puth hash in a data-id="<hash>" inside the div
+                    var hash = generateUUID()(); // generateIndex(file);
+                    div.fileIndices.push(hash);
+                    file_div.setAttribute('data-id', hash);
+
+
+                    // check file type for image/*
+                    // if image
+                    //  FileReader API to read the the file AS A DATAURL .readAsDataURL()
+                    //  console.log the data
+                    if (file.type.contains('image/')) {
+                        var reader = new FileReader();
+                        reader.addEventListener('loadend', function (event) {
+                            var img = document.createElement('img');
+                            img.src = event.target.result;
+                            img.setAttribute('data-id', hash);
+                            displayImages.appendChild(img);
+                        });
+                        reader.readAsDataURL(file);
+                    }
+
+
+                    div.appendChild(file_div);
+
+
+                });
+
+            });
+        });
+
+
+        // base sha1 or md5 hash
+        function generateIndex() {
+            // arguments
+            var file = arguments[0];
+            return Sha1.hash(
+                file.name + file.size + file.type  + file.lastModifiedDate
+            );
+        }
+
+
+        // uuid technique
+        function generateUUID(){
+            return (function() {
+                function s4() {
+                    return Math.floor((1 + Math.random()) * 0x10000)
+                            .toString(16)
+                            .substring(1);
+                }
+                return function() {
+                    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+                            s4() + '-' + s4() + s4() + s4();
+                };
+            })();
+        }
+
+
+        // custom hash
+
+
+
+
+
+    </script>
+</head>
+<body>
+    <input type="file" multiple id="inp1"/>
+    <div class="input" data-for="inp1">
+
+    </div>
+    <div id="selected_images">
+
+    </div>
+
+</body>
+</html>

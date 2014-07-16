@@ -1,0 +1,16 @@
+javascript
+var xhr = new XMLHttpRequest(); // Create a new request
+xhr.open("POST", ‘/fileupload’); // POST to the URL
+xhr.onreadystate …
+xhr.send(inp.files[0]);
+
+nodejs - app.js
+app.post(‘/fileupload’, function(req, res) {
+
+console.log(req.files);
+console.log(req.body);
+
+});
+
+
+http://howtonode.org/really-simple-file-uploads
